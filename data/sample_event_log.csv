@@ -1,0 +1,18 @@
+case_id,activity,timestamp,department
+CASE001,Registration,2026-10-01 09:00,Reception
+CASE001,Initial Assessment,2026-10-01 09:15,Outpatient
+CASE001,Laboratory Test,2026-10-01 09:30,Laboratory
+CASE001,Diagnosis,2026-10-01 09:50,Outpatient
+CASE001,Treatment,2026-10-01 10:10,Outpatient
+CASE002,Registration,2026-10-01 09:10,Reception
+CASE002,Initial Assessment,2026-10-01 09:25,Outpatient
+CASE002,Diagnosis,2026-10-01 09:40,Outpatient
+CASE002,Treatment,2026-10-01 10:00,Outpatient
+CASE003,Registration,2026-10-01 10:00,Reception
+CASE003,Initial Assessment,2026-10-01 10:20,Outpatient
+CASE003,Laboratory Test,2026-10-01 10:35,Laboratory
+CASE003,Diagnosis,2026-10-01 11:00,Outpatient
+CASE003,Treatment,2026-10-01 11:20,Outpatient
+CASE004,Registration,2026-10-01 10:15,Reception
+CASE004,Initial Assessment,2026-10-01 10:30,Outpatient
+CASE004,Treatment,2026-10-01 10:50,Outpatient
