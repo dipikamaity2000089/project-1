@@ -21,6 +21,16 @@ activities = [
     "Discharge"
 ]
 
+durations = {
+    "Registration": (5, 10),
+    "Triage": (5, 15),
+    "Doctor Consultation": (10, 25),
+    "Lab Test": (15, 30),
+    "X-Ray": (10, 20),
+    "Treatment": (15, 30),
+    "Discharge": (5, 10)
+}
+
 all_events = []
 
 for patient_number in range(1, 11):
@@ -46,19 +56,41 @@ for patient_number in range(1, 11):
     ])
 
     for activity in patient_activities:
+        start_time = current_time
+
+        duration_minutes = random.randint(
+            durations[activity][0],
+            durations[activity][1]
+        )
+
+        end_time = start_time + timedelta(
+            minutes=duration_minutes
+        )
+
         all_events.append([
             patient_id,
             activity,
-            current_time.strftime("%Y-%m-%d %H:%M:%S")
+            start_time.strftime("%Y-%m-%d %H:%M:%S"),
+            start_time.strftime("%Y-%m-%d %H:%M:%S"),
+            end_time.strftime("%Y-%m-%d %H:%M:%S")
         ])
 
-        current_time += timedelta(minutes=random.randint(5, 30))
+        waiting_minutes = random.randint(5, 30)
+        current_time = end_time + timedelta(
+            minutes=waiting_minutes
+        )
 
 output_file.parent.mkdir(parents=True, exist_ok=True)
 
 with open(output_file, "w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
-    writer.writerow(["Case_ID", "Activity_Name", "Timestamp"])
+    writer.writerow([
+        "Case_ID",
+        "Activity_Name",
+        "Timestamp",
+        "Activity_Start_Time",
+        "Activity_End_Time"
+    ])
     writer.writerows(all_events)
 
 print("Hospital event CSV created successfully!")

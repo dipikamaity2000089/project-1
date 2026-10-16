@@ -1,68 +1,58 @@
-import csv
-from datetime import datetime
+import pandas as pd
 from pathlib import Path
 
-project_folder = Path(__file__).resolve().parent.parent
+project_dir = Path(__file__).resolve().parent.parent
 
-input_file = project_folder / "data" / "hospital_events.csv"
-output_file = project_folder / "data" / "cleaned_hospital_events.csv"
+input_file = project_dir / "data" / "hospital_events.csv"
+output_file = project_dir / "data" / "cleaned_hospital_events.csv"
 
-cleaned_events = []
-seen_events = set()
-removed_duplicates = 0
-removed_invalid = 0
+df = pd.read_csv(input_file)
 
-with open(input_file, "r", newline="", encoding="utf-8") as file:
-    reader = csv.DictReader(file)
+required_columns = [
+    "Case_ID",
+    "Activity_Name",
+    "Timestamp",
+    "Activity_Start_Time",
+    "Activity_End_Time"
+]
 
-    required_columns = ["Case_ID", "Activity_Name", "Timestamp"]
+missing_columns = [
+    column for column in required_columns
+    if column not in df.columns
+]
 
-    if reader.fieldnames != required_columns:
-        raise ValueError("CSV columns do not match the expected format.")
+if missing_columns:
+    raise ValueError(f"Missing columns: {missing_columns}")
 
-    for row in reader:
-        case_id = row["Case_ID"].strip()
-        activity = row["Activity_Name"].strip()
-        timestamp = row["Timestamp"].strip()
+df = df[required_columns].copy()
 
-        if not case_id or not activity or not timestamp:
-            removed_invalid += 1
-            continue
+for column in [
+    "Timestamp",
+    "Activity_Start_Time",
+    "Activity_End_Time"
+]:
+    df[column] = pd.to_datetime(df[column], errors="coerce")
 
-        try:
-            datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            removed_invalid += 1
-            continue
+df = df.dropna(subset=required_columns)
 
-        event = (case_id, activity, timestamp)
+df = df.drop_duplicates()
 
-        if event in seen_events:
-            removed_duplicates += 1
-            continue
+df = df.sort_values(
+    ["Case_ID", "Activity_Start_Time"]
+).reset_index(drop=True)
 
-        seen_events.add(event)
-
-        cleaned_events.append({
-            "Case_ID": case_id,
-            "Activity_Name": activity,
-            "Timestamp": timestamp
-        })
-
-cleaned_events.sort(
-    key=lambda row: (row["Case_ID"], row["Timestamp"])
+invalid_durations = (
+    df["Activity_End_Time"] < df["Activity_Start_Time"]
 )
 
-with open(output_file, "w", newline="", encoding="utf-8") as file:
-    columns = ["Case_ID", "Activity_Name", "Timestamp"]
-    writer = csv.DictWriter(file, fieldnames=columns)
-    writer.writeheader()
-    writer.writerows(cleaned_events)
+if invalid_durations.any():
+    raise ValueError("Some activities end before they start.")
 
-print("Data cleaning completed!")
-print("Original file:", input_file.name)
-print("Cleaned file:", output_file.name)
-print("Valid events:", len(cleaned_events))
-print("Duplicates removed:", removed_duplicates)
-print("Invalid rows removed:", removed_invalid)
-print("Output saved to:", output_file)
+df.to_csv(output_file, index=False)
+
+print("Data cleaning completed successfully!")
+print("Total cleaned events:", len(df))
+print("Unique patients:", df["Case_ID"].nunique())
+print("Columns:", list(df.columns))
+print("Missing values:", df.isnull().sum().sum())
+print("Saved to:", output_file)
