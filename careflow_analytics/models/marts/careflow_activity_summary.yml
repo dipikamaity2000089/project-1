@@ -1,0 +1,31 @@
+
+version: 2
+
+models:
+  - name: careflow_activity_summary
+    description: "Activity-level summary of CareFlow process events"
+    columns:
+      - name: activity
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_occurrences
+        data_tests:
+          - not_null
+
+      - name: cases_involved
+        data_tests:
+          - not_null
+
+      - name: departments_involved
+        data_tests:
+          - not_null
+
+      - name: first_recorded_at
+        data_tests:
+          - not_null
+
+      - name: last_recorded_at
+        data_tests:
+          - not_null

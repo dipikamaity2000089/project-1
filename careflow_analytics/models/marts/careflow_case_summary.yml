@@ -1,0 +1,35 @@
+
+version: 2
+
+models:
+  - name: careflow_case_summary
+    description: "Case-level summary of CareFlow process events"
+    columns:
+      - name: case_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_activities
+        data_tests:
+          - not_null
+
+      - name: process_start_time
+        data_tests:
+          - not_null
+
+      - name: process_end_time
+        data_tests:
+          - not_null
+
+      - name: process_duration_minutes
+        data_tests:
+          - not_null
+
+      - name: unique_activities
+        data_tests:
+          - not_null
+
+      - name: departments_involved
+        data_tests:
+          - not_null

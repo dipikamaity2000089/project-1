@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: careflow
+    schema: "{{ target.schema }}"
+    description: "CareFlow hospital event log data loaded into BigQuery"
+    tables:
+      - name: raw_event_log
+        description: "Raw patient process events including activity, timestamp, and department"

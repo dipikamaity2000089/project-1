@@ -1,0 +1,19 @@
+
+version: 2
+
+models:
+  - name: stg_careflow_events
+    description: "Cleaned CareFlow event log staging view"
+    columns:
+      - name: case_id
+        data_tests:
+          - not_null
+      - name: activity
+        data_tests:
+          - not_null
+      - name: event_timestamp
+        data_tests:
+          - not_null
+      - name: department
+        data_tests:
+          - not_null
