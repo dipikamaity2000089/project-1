@@ -1,0 +1,17 @@
+CARE FLOW - DATA QUALITY REPORT
+===================================
+Total events: 63
+Unique patients: 10
+Unique activities: 7
+Missing values: 0
+Duplicate rows: 0
+Invalid durations: 0
+
+EVENT COUNT BY ACTIVITY
+Discharge: 10
+Doctor Consultation: 10
+Lab Test: 7
+Registration: 10
+Treatment: 10
+Triage: 13
+X-Ray: 3
