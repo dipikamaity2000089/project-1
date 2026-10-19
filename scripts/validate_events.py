@@ -1,37 +1,84 @@
-
 import pandas as pd
 from pathlib import Path
 
-file_path = Path("data/cleaned_hospital_events.csv")
+BASE_DIR = Path(__file__).resolve().parent.parent
+FILE_PATH = BASE_DIR / "data" / "cleaned_hospital_events.csv"
 
-df = pd.read_csv(file_path)
+REQUIRED_COLUMNS = [
+    "Case_ID",
+    "Activity_Name",
+    "Timestamp",
+    "Activity_Start_Time",
+    "Activity_End_Time"
+]
 
-required_columns = ["Case_ID", "Activity_Name", "Timestamp"]
+def main():
+    print("CAREFLOW DATA VALIDATION")
+    print("-" * 35)
 
-print("CARE­FLOW DATA VALIDATION")
-print("-" * 30)
+    if not FILE_PATH.exists():
+        print(f"Dataset not found: {FILE_PATH}")
+        return
 
-print("Total events:", len(df))
-print("Unique patients:", df["Case_ID"].nunique())
+    df = pd.read_csv(FILE_PATH)
 
-missing_columns = [col for col in required_columns if col not in df.columns]
+    print("Total events:", len(df))
 
-if missing_columns:
-    print("Missing columns:", missing_columns)
-else:
+    missing_columns = [
+        col for col in REQUIRED_COLUMNS if col not in df.columns
+    ]
+
+    if missing_columns:
+        print("Missing columns:", missing_columns)
+        return
+
     print("Required columns: PASS")
+    print("Unique patients:", df["Case_ID"].nunique())
+    print("Missing values:", int(df[REQUIRED_COLUMNS].isnull().sum().sum()))
+    print("Duplicate rows:", int(df.duplicated().sum()))
 
-print("Missing values:", df.isnull().sum().sum())
-print("Duplicate rows:", df.duplicated().sum())
+    timestamp_columns = [
+        "Timestamp",
+        "Activity_Start_Time",
+        "Activity_End_Time"
+    ]
 
-timestamps = pd.to_datetime(df["Timestamp"], errors="coerce")
+    invalid_timestamps = {}
 
-print("Invalid timestamps:", timestamps.isnull().sum())
+    for column in timestamp_columns:
+        parsed = pd.to_datetime(df[column], errors="coerce")
+        invalid_timestamps[column] = int(parsed.isnull().sum())
 
-if timestamps.isnull().sum() == 0:
-    print("Timestamp validation: PASS")
-else:
-    print("Timestamp validation: FAIL")
+    total_invalid = sum(invalid_timestamps.values())
 
-print("-" * 30)
-print("Validation completed.")
+    print("Invalid timestamps:", total_invalid)
+
+    for column, count in invalid_timestamps.items():
+        print(f"  {column}: {count} invalid")
+
+    start_times = pd.to_datetime(
+        df["Activity_Start_Time"], errors="coerce"
+    )
+    end_times = pd.to_datetime(
+        df["Activity_End_Time"], errors="coerce"
+    )
+
+    invalid_durations = int((end_times < start_times).sum())
+
+    print("Invalid durations:", invalid_durations)
+
+    passed = (
+        df[REQUIRED_COLUMNS].notnull().all().all()
+        and df["Case_ID"].astype(str).str.strip().ne("").all()
+        and df["Activity_Name"].astype(str).str.strip().ne("").all()
+        and total_invalid == 0
+        and invalid_durations == 0
+        and df.duplicated().sum() == 0
+    )
+
+    print("-" * 35)
+    print("Overall validation:", "PASS" if passed else "FAIL")
+    print("Validation completed.")
+
+if __name__ == "__main__":
+    main()
