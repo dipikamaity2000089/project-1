@@ -1,0 +1,27 @@
+
+version: 2
+
+models:
+  - name: careflow_updated_activity_summary
+    description: "Activity-level analytics summary for the updated CareFlow hospital event dataset"
+    columns:
+      - name: activity
+        data_tests:
+          - unique
+          - not_null
+
+      - name: total_occurrences
+        data_tests:
+          - not_null
+
+      - name: distinct_cases
+        data_tests:
+          - not_null
+
+      - name: first_event_timestamp
+        data_tests:
+          - not_null
+
+      - name: last_event_timestamp
+        data_tests:
+          - not_null

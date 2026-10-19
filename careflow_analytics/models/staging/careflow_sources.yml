@@ -7,3 +7,10 @@ sources:
     tables:
       - name: raw_event_log
         description: "Raw patient process events including activity, timestamp, and department"
+
+  - name: careflow_updated
+    schema: careflow_raw
+    description: "Updated CareFlow hospital event dataset"
+    tables:
+      - name: raw_updated_hospital_events
+        description: "Hospital events with activity start and end times"

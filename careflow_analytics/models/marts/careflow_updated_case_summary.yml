@@ -1,0 +1,31 @@
+
+version: 2
+
+models:
+  - name: careflow_updated_case_summary
+    description: "Case-level analytics summary for the updated CareFlow hospital event dataset"
+    columns:
+      - name: case_id
+        data_tests:
+          - unique
+          - not_null
+
+      - name: total_activities
+        data_tests:
+          - not_null
+
+      - name: case_start_time
+        data_tests:
+          - not_null
+
+      - name: case_end_time
+        data_tests:
+          - not_null
+
+      - name: case_duration_minutes
+        data_tests:
+          - not_null
+
+      - name: unique_activities
+        data_tests:
+          - not_null
