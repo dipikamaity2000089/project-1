@@ -1,0 +1,8 @@
+Activity_Name,Event_Count,Average_Duration_Minutes,Minimum_Duration_Minutes,Maximum_Duration_Minutes
+Discharge,10,7.4,5.0,10.0
+Doctor Consultation,10,19.5,13.0,24.0
+Lab Test,7,24.0,17.0,29.0
+Registration,10,7.2,5.0,10.0
+Treatment,10,22.9,16.0,27.0
+Triage,13,9.77,6.0,15.0
+X-Ray,3,16.33,11.0,19.0
