@@ -23,3 +23,8 @@ process_tree = pm4py.discover_process_tree_inductive(
 print("Process mining completed successfully!")
 print(process_tree)
 pm4py.view_process_tree(process_tree)
+pm4py.view_process_tree(process_tree)
+pm4py.save_vis_process_tree(
+    process_tree,
+    "Data/process_tree.png"
+)
