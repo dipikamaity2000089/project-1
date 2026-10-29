@@ -37,3 +37,17 @@ The project uses cleaned hospital event-log data for analysis.
 - Data: Dataset files, analysis results, and charts.
 - scripts: Python scripts for data checking, process mining, and analysis.
 - main.py: Main project file.
+## Process Tree Visualisation
+- Discovered a process tree using PM4Py.
+- Generated and saved the process tree diagram as `Data/process_tree.png`.
+- The diagram helps visualise the clinical process model discovered from the available event log.
+
+## Activity Sequence Analysis
+- Analysed consecutive hospital activities for each case.
+- Counted the frequency of transitions between activities.
+- Saved the results in `Data/activity_sequence_summary.csv`.
+
+## Analysis Notes
+- The analysis is based on the available hospital event-log dataset.
+- Time differences between consecutive events are estimates of intervals, not confirmed waiting times or activity durations.
+- Potential bottlenecks require further investigation and validation.
