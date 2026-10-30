@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>CareFlow Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--ac:#2563eb;--hot:#dc2626;--ok:#16a34a;--nd:#e8f0fe;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--card:#1e293b;--tx:#e5e7eb;--mu:#94a3b8;--bd:#334155;--ac:#60a5fa;--hot:#f87171;--ok:#4ade80;--nd:#1e3a5f}}
+:root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--tx:#e5e7eb;--mu:#94a3b8;--bd:#334155;--ac:#60a5fa;--hot:#f87171;--ok:#4ade80;--nd:#1e3a5f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif;padding:16px}
+h1{font-size:20px;margin:0}h2{font-size:14px;margin:0 0 10px}.sub{color:var(--mu);margin:2px 0 14px}
+.g{display:grid;gap:12px}.k{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.two{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));margin-top:12px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;min-width:0}
+.kv{font-size:26px;font-weight:700}.kl{color:var(--mu);font-size:12px}.hot{color:var(--hot)}
+.sc{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);white-space:nowrap}
+.b{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;color:#fff}
+button{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:4px 10px;border-radius:6px;cursor:pointer;margin-right:4px}button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.row{display:flex;align-items:center;gap:8px;margin:5px 0}.row span:first-child{width:200px;font-size:12px;flex:none}.bar{height:14px;border-radius:3px;background:var(--ac)}
+svg text{fill:var(--tx);font-family:system-ui,sans-serif}
+</style></head><body>
+<h1>CareFlow: Emergency Room Pathway Analysis</h1>
+<div class="sub">Process mining on simulated EHR event logs · 10 patients · 63 events</div>
+<div class="g k" id="kpis"></div>
+<div class="c" style="margin-top:12px"><h2>As-is process map (red = average wait of 20 min or more; line width = patient volume)</h2><div class="sc"><svg id="map" viewBox="0 0 1000 290" width="100%" style="min-width:760px"></svg></div></div>
+<div class="g two">
+<div class="c"><h2>Average wait by transition (min)</h2><div id="bars"></div></div>
+<div class="c"><h2>Average service time by activity (min)</h2><div id="svc"></div></div></div>
+<div class="c" style="margin-top:12px"><h2>Conformance by patient</h2>
+<div style="margin-bottom:8px"><button class="on" data-f="all">All</button><button data-f="bad">Non-compliant</button><button data-f="ok">Compliant</button></div>
+<div class="sc"><table><thead><tr><th>Case</th><th>Path</th><th>Stay (min)</th><th>Status</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<script>
+const D={"k": {"cases": 10.0, "avg_length_of_stay_min": 182.0, "pct_cases_looping_back_to_triage": 30.0, "avg_los_with_loop_min": 183.7, "avg_los_without_loop_min": 181.3, "pct_conformant": 70.0}, "e": [{"from": "Doctor Consultation", "to": "X-Ray", "cases": 1, "freq": 1, "avg_wait_min": 28.0, "max_wait_min": 28.0}, {"from": "Doctor Consultation", "to": "Triage", "cases": 3, "freq": 3, "avg_wait_min": 19.7, "max_wait_min": 26.0}, {"from": "Lab Test", "to": "Treatment", "cases": 7, "freq": 7, "avg_wait_min": 18.7, "max_wait_min": 27.0}, {"from": "Treatment", "to": "Discharge", "cases": 10, "freq": 10, "avg_wait_min": 18.5, "max_wait_min": 30.0}, {"from": "Triage", "to": "Doctor Consultation", "cases": 10, "freq": 10, "avg_wait_min": 18.0, "max_wait_min": 28.0}, {"from": "Doctor Consultation", "to": "Lab Test", "cases": 6, "freq": 6, "avg_wait_min": 17.5, "max_wait_min": 29.0}, {"from": "X-Ray", "to": "Treatment", "cases": 3, "freq": 3, "avg_wait_min": 17.3, "max_wait_min": 18.0}, {"from": "Registration", "to": "Triage", "cases": 10, "freq": 10, "avg_wait_min": 13.2, "max_wait_min": 28.0}, {"from": "Triage", "to": "X-Ray", "cases": 2, "freq": 2, "avg_wait_min": 12.0, "max_wait_min": 17.0}, {"from": "Triage", "to": "Lab Test", "cases": 1, "freq": 1, "avg_wait_min": 10.0, "max_wait_min": 10.0}], "a": [{"Activity_Name": "Discharge", "events": 10, "avg_service_min": 7.4, "avg_wait_before_min": 18.5}, {"Activity_Name": "Doctor Consultation", "events": 10, "avg_service_min": 19.5, "avg_wait_before_min": 18.0}, {"Activity_Name": "Lab Test", "events": 7, "avg_service_min": 24.0, "avg_wait_before_min": 16.4}, {"Activity_Name": "Registration", "events": 10, "avg_service_min": 7.2, "avg_wait_before_min": NaN}, {"Activity_Name": "Treatment", "events": 10, "avg_service_min": 22.9, "avg_wait_before_min": 18.3}, {"Activity_Name": "Triage", "events": 13, "avg_service_min": 9.8, "avg_wait_before_min": 14.7}, {"Activity_Name": "X-Ray", "events": 3, "avg_service_min": 16.3, "avg_wait_before_min": 17.3}], "c": [{"case": "P001", "path": "Registration > Triage > Doctor Consultation > Triage > X-Ray > Treatment > Discharge", "issues": "Rework: returned to Triage", "compliant": false, "total_los_min": 175.0}, {"case": "P002", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 207.0}, {"case": "P003", "path": "Registration > Triage > Doctor Consultation > Triage > X-Ray > Treatment > Discharge", "issues": "Rework: returned to Triage", "compliant": false, "total_los_min": 173.0}, {"case": "P004", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 167.0}, {"case": "P005", "path": "Registration > Triage > Doctor Consultation > Triage > Lab Test > Treatment > Discharge", "issues": "Rework: returned to Triage", "compliant": false, "total_los_min": 203.0}, {"case": "P006", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 194.0}, {"case": "P007", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 154.0}, {"case": "P008", "path": "Registration > Triage > Doctor Consultation > X-Ray > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 170.0}, {"case": "P009", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 179.0}, {"case": "P010", "path": "Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge", "issues": "", "compliant": true, "total_los_min": 198.0}]};
+const $=i=>document.getElementById(i);
+const K=[["Patients",D.k.cases],["Avg stay (min)",D.k.avg_length_of_stay_min],["Looping back to Triage",D.k.pct_cases_looping_back_to_triage+"%",1],["Conformant",D.k.pct_conformant+"%"]];
+$("kpis").innerHTML=K.map(x=>`<div class="c"><div class="kl">${x[0]}</div><div class="kv ${x[2]?"hot":""}">${x[1]}</div></div>`).join("");
+const P={"Registration":[70,145],"Triage":[240,145],"Doctor Consultation":[410,145],"X-Ray":[600,60],"Lab Test":[600,230],"Treatment":[780,145],"Discharge":[930,145]};
+const A={};D.a.forEach(r=>A[r.Activity_Name]=r);
+const W=54,H=22,mx=Math.max(...D.e.map(r=>r.freq));
+let s=`<defs><marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#6b7280"/></marker><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0L8,4L0,8z" fill="#dc2626"/></marker></defs>`;
+D.e.forEach(r=>{const f=P[r.from],t=P[r.to],hot=r.avg_wait_min>=20,col=hot?"#dc2626":"#6b7280",w=1+4*r.freq/mx;
+ let x1=f[0]+W,y1=f[1],x2=t[0]-W,y2=t[1],path,lx,ly;
+ if(r.from=="Doctor Consultation"&&r.to=="Triage"){x1=f[0]-20;x2=t[0]+20;y1=y2=f[1]+H;path=`M${x1},${y1} Q${(x1+x2)/2},${y1+75} ${x2},${y2+2}`;lx=(x1+x2)/2;ly=y1+62}
+ else if(r.from=="Triage"&&r.to=="Doctor Consultation"){y1=y2=f[1]-8;path=`M${x1},${y1} L${x2},${y2}`;lx=(x1+x2)/2;ly=y1-6}
+ else{path=`M${x1},${y1} L${x2},${y2}`;const u=(r.from=="Triage"&&(r.to=="X-Ray"||r.to=="Lab Test"))?.7:.5;lx=x1+(x2-x1)*u;ly=y1+(y2-y1)*u-6}
+ s+=`<path d="${path}" fill="none" stroke="${col}" stroke-width="${w}" marker-end="url(#${hot?"ar":"ah"})"/><text x="${lx}" y="${ly}" font-size="11" text-anchor="middle" style="fill:${col}">n=${r.freq} · ${r.avg_wait_min.toFixed(0)}m</text>`});
+Object.entries(P).forEach(([n,p])=>{const a=A[n];s+=`<rect x="${p[0]-W}" y="${p[1]-H}" width="${2*W}" height="${2*H}" rx="8" style="fill:var(--nd);stroke:var(--bd)"/><text x="${p[0]}" y="${p[1]-3}" font-size="12" font-weight="600" text-anchor="middle">${n=="Doctor Consultation"?"Doctor Consult":n}</text><text x="${p[0]}" y="${p[1]+12}" font-size="10" text-anchor="middle" style="fill:var(--mu)">${a.events} events · ${a.avg_service_min.toFixed(0)} min</text>`});
+$("map").innerHTML=s;
+const bars=(el,rows,key,lab,cut)=>{const m=Math.max(...rows.map(r=>r[key]));$(el).innerHTML=rows.map(r=>`<div class="row"><span>${lab(r)}</span><div class="bar" style="width:${r[key]/m*55}%;${cut&&r[key]>=cut?"background:var(--hot)":""}"></div><span style="width:auto">${r[key].toFixed(1)}</span></div>`).join("")};
+bars("bars",D.e,"avg_wait_min",r=>r.from+" → "+r.to,20);
+bars("svc",[...D.a].sort((x,y)=>y.avg_service_min-x.avg_service_min),"avg_service_min",r=>r.Activity_Name);
+let F="all";
+const draw=()=>{$("tb").innerHTML=D.c.filter(r=>F=="all"||(F=="ok")==(r.compliant===true||r.compliant==="True")).map(r=>{const ok=r.compliant===true||r.compliant==="True";return`<tr><td>${r.case}</td><td>${r.path.replace(/ > /g," → ")}</td><td>${r.total_los_min}</td><td><span class="b" style="background:var(${ok?"--ok":"--hot"})">${ok?"Compliant":r.issues}</span></td></tr>`}).join("")};
+document.querySelectorAll("button").forEach(b=>b.onclick=()=>{F=b.dataset.f;document.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x==b));draw()});
+draw();
+</script></body></html>
