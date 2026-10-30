@@ -1,0 +1,11 @@
+from,to,cases,freq,avg_wait_min,max_wait_min
+Doctor Consultation,X-Ray,1,1,28.0,28.0
+Doctor Consultation,Triage,3,3,19.7,26.0
+Lab Test,Treatment,7,7,18.7,27.0
+Treatment,Discharge,10,10,18.5,30.0
+Triage,Doctor Consultation,10,10,18.0,28.0
+Doctor Consultation,Lab Test,6,6,17.5,29.0
+X-Ray,Treatment,3,3,17.3,18.0
+Registration,Triage,10,10,13.2,28.0
+Triage,X-Ray,2,2,12.0,17.0
+Triage,Lab Test,1,1,10.0,10.0

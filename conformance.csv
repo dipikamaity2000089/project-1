@@ -1,0 +1,11 @@
+case,path,issues,compliant,total_los_min
+P001,Registration > Triage > Doctor Consultation > Triage > X-Ray > Treatment > Discharge,Rework: returned to Triage,False,175.0
+P002,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,207.0
+P003,Registration > Triage > Doctor Consultation > Triage > X-Ray > Treatment > Discharge,Rework: returned to Triage,False,173.0
+P004,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,167.0
+P005,Registration > Triage > Doctor Consultation > Triage > Lab Test > Treatment > Discharge,Rework: returned to Triage,False,203.0
+P006,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,194.0
+P007,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,154.0
+P008,Registration > Triage > Doctor Consultation > X-Ray > Treatment > Discharge,,True,170.0
+P009,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,179.0
+P010,Registration > Triage > Doctor Consultation > Lab Test > Treatment > Discharge,,True,198.0
