@@ -1,0 +1,18 @@
+CAREFLOW - CLINICAL PERFORMANCE FINDINGS
+=============================================
+
+Total activity transitions analysed: 10
+Total observed transitions: 55
+
+TRANSITION WITH THE HIGHEST AVERAGE INTERVAL
+Transition: Triage -> Lab Test
+Average interval: 24.50 minutes
+Observed frequency: 2
+
+MOST FREQUENT TRANSITION
+Transition: Registration -> Triage
+Frequency: 10
+
+INTERPRETATION
+These results describe intervals between consecutive events.
+They do not independently confirm actual patient waiting times or clinical bottlenecks.

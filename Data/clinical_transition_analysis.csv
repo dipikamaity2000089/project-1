@@ -1,0 +1,11 @@
+Activity_Name,Next_Activity,Transition_Frequency,Average_Interval_Minutes,Maximum_Interval_Minutes
+Triage,Lab Test,2,24.5,27.0
+Doctor Consultation,Triage,5,17.8,27.0
+Registration,Triage,10,17.7,29.0
+Treatment,Discharge,10,17.3,26.0
+Doctor Consultation,X-Ray,3,17.0,27.0
+Triage,X-Ray,3,16.333333333333332,28.0
+Lab Test,Treatment,4,14.75,18.0
+Doctor Consultation,Lab Test,2,14.5,17.0
+Triage,Doctor Consultation,10,14.5,30.0
+X-Ray,Treatment,6,12.666666666666666,27.0
