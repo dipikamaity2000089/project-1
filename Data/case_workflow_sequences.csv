@@ -1,0 +1,11 @@
+Case_ID,Workflow_Sequence
+P001,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge
+P002,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge
+P003,Registration -> Triage -> Doctor Consultation -> Triage -> Lab Test -> Treatment -> Discharge
+P004,Registration -> Triage -> Doctor Consultation -> Triage -> Lab Test -> Treatment -> Discharge
+P005,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge
+P006,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge
+P007,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge
+P008,Registration -> Triage -> Doctor Consultation -> Lab Test -> Treatment -> Discharge
+P009,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge
+P010,Registration -> Triage -> Doctor Consultation -> Lab Test -> Treatment -> Discharge

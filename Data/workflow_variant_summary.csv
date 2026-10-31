@@ -1,0 +1,5 @@
+Workflow_Sequence,Number_of_Cases,Percentage_of_Cases
+Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge,3,30.0
+Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge,3,30.0
+Registration -> Triage -> Doctor Consultation -> Triage -> Lab Test -> Treatment -> Discharge,2,20.0
+Registration -> Triage -> Doctor Consultation -> Lab Test -> Treatment -> Discharge,2,20.0
