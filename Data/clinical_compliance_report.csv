@@ -1,0 +1,11 @@
+Case_ID,Observed_Activities,Number_of_Activities,Matches_Reference_Workflow
+P001,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge,7,False
+P002,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge,6,False
+P003,Registration -> Triage -> Doctor Consultation -> Triage -> Lab Test -> Treatment -> Discharge,7,False
+P004,Registration -> Triage -> Doctor Consultation -> Triage -> Lab Test -> Treatment -> Discharge,7,False
+P005,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge,7,False
+P006,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge,6,False
+P007,Registration -> Triage -> Doctor Consultation -> X-Ray -> Treatment -> Discharge,6,False
+P008,Registration -> Triage -> Doctor Consultation -> Lab Test -> Treatment -> Discharge,6,True
+P009,Registration -> Triage -> Doctor Consultation -> Triage -> X-Ray -> Treatment -> Discharge,7,False
+P010,Registration -> Triage -> Doctor Consultation -> Lab Test -> Treatment -> Discharge,6,True
