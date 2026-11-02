@@ -16,6 +16,6 @@ Only 70% of cases followed the ideal pathway.
 The longest handoff delays, around 18 to 20 minutes on average, sat between Doctor Consultation and re-Triage, between Lab Test and Treatment, and between Treatment and Discharge.
 Average length of stay was 182 minutes.
 
-Tech stack: Python, PM4Py, pandas, Graphviz, Google BigQuery, dbt, SQL, Microsoft Power BI
+Tech stack: Python, pandas, Graphviz, Google BigQuery, SQL, Microsoft Power BI
 
 Key takeaway: Event-log architecture, which treats data as chronological sequences of events instead of flat tables, exposes hidden operational friction and points to specific, fixable bottlenecks such as the intake rework loop.
