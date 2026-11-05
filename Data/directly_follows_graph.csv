@@ -1,0 +1,11 @@
+From_Activity,To_Activity,Frequency
+Doctor Consultation,Lab Test,2
+Doctor Consultation,Triage,5
+Doctor Consultation,X-Ray,3
+Lab Test,Treatment,4
+Registration,Triage,10
+Treatment,Discharge,10
+Triage,Doctor Consultation,10
+Triage,Lab Test,2
+Triage,X-Ray,3
+X-Ray,Treatment,6
