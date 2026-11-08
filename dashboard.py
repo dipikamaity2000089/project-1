@@ -2,98 +2,54 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
-# --------------------------------------------------
-# PAGE CONFIGURATION
-# --------------------------------------------------
+from pathlib import Path
 
 st.set_page_config(
-    page_title="CareFlow | Patient Analytics",
+    page_title="CareFlow Analytics",
     page_icon="🏥",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# --------------------------------------------------
-# FORMAL CORPORATE THEME
-# --------------------------------------------------
+DATA_PATH = Path("data/cleaned_hospital_events.csv")
 
 st.markdown("""
 <style>
-
 .stApp {
-    background-color: #F3F5F8;
-    color: #263445;
+    background-color: #F3F6F9;
+    color: #243447;
 }
-
-.block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    max-width: 1500px;
-}
-
-h1, h2, h3 {
-    color: #17324D !important;
-    font-weight: 650;
-}
-
-p, label {
-    color: #526477;
-}
-
 [data-testid="stSidebar"] {
-    background-color: #E8EDF3;
-    border-right: 1px solid #D5DDE6;
+    background-color: #E7EDF3;
 }
-
-[data-testid="stMetric"] {
+h1, h2, h3 {
+    color: #20364B;
+}
+.metric-card {
     background-color: #FFFFFF;
-    border: 1px solid #DCE3EB;
-    border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 7px rgba(25, 45, 70, 0.05);
+    border-radius: 12px;
+    border: 1px solid #DCE4EC;
+    box-shadow: 0 2px 7px rgba(20, 40, 60, 0.06);
+    text-align: center;
 }
-
-[data-testid="stMetricLabel"] {
-    color: #53677D;
+.metric-label {
+    color: #62758A;
+    font-size: 14px;
 }
-
-[data-testid="stMetricValue"] {
-    color: #17324D;
-    font-weight: 700;
+.metric-value {
+    color: #20364B;
+    font-size: 27px;
+    font-weight: bold;
 }
-
-.stButton button,
-.stDownloadButton button {
-    background-color: #173F5F;
-    color: white;
-    border-radius: 7px;
-    border: none;
-}
-
-.stButton button:hover,
-.stDownloadButton button:hover {
-    background-color: #246B83;
-    color: white;
-}
-
-hr {
-    border-color: #DCE3EB;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
-# LOAD DATA
-# --------------------------------------------------
 
 @st.cache_data
 def load_data():
+    df = pd.read_csv(DATA_PATH)
 
-    df = pd.read_csv("data/cleaned_hospital_events.csv")
-
-    required_columns = [
+    required = [
         "Case_ID",
         "Activity_Name",
         "Timestamp",
@@ -101,14 +57,11 @@ def load_data():
         "Activity_End_Time"
     ]
 
-    missing = [
-        col for col in required_columns
-        if col not in df.columns
-    ]
+    missing = [col for col in required if col not in df.columns]
 
     if missing:
         raise ValueError(
-            f"Missing required columns: {missing}"
+            "Missing required columns: " + ", ".join(missing)
         )
 
     for col in [
@@ -116,359 +69,475 @@ def load_data():
         "Activity_Start_Time",
         "Activity_End_Time"
     ]:
-        df[col] = pd.to_datetime(
-            df[col],
-            errors="coerce"
-        )
+        df[col] = pd.to_datetime(df[col], errors="coerce")
 
     df = df.dropna(
         subset=["Case_ID", "Activity_Name", "Timestamp"]
     )
 
-    df = df.sort_values(
-        ["Case_ID", "Timestamp"]
-    ).copy()
-
-    df["Duration_Minutes"] = (
-        df["Activity_End_Time"] -
-        df["Activity_Start_Time"]
+    df["Activity_Duration"] = (
+        df["Activity_End_Time"] - df["Activity_Start_Time"]
     ).dt.total_seconds() / 60
+
+    df.loc[
+        df["Activity_Duration"] < 0,
+        "Activity_Duration"
+    ] = None
 
     return df
 
 
 try:
-    df = load_data()
-
+    data = load_data()
 except Exception as error:
-    st.error(f"Unable to load dataset: {error}")
+    st.error(f"Unable to load the dataset: {error}")
     st.stop()
 
-if df.empty:
-    st.error("The dataset contains no valid event records.")
-    st.stop()
 
-# --------------------------------------------------
-# HEADER
-# --------------------------------------------------
-
-st.markdown("# 🏥 CareFlow")
-st.markdown(
-    "### Patient Journey & Healthcare Process Analytics"
-)
+# Header
+st.title("🏥 CareFlow Patient Journey Dashboard")
 
 st.caption(
-    "Hospital Workflow Monitoring | Synthetic Educational Dataset"
+    "Hospital Workflow Analytics | Synthetic Dataset"
 )
 
-st.divider()
+st.markdown("---")
 
-# --------------------------------------------------
-# SIDEBAR FILTERS
-# --------------------------------------------------
 
-st.sidebar.title("Dashboard Controls")
+# Sidebar filters
+st.sidebar.title("Dashboard Filters")
 
-st.sidebar.caption(
-    "Filter the data to explore patient journeys."
-)
-
-patients = sorted(
-    df["Case_ID"].astype(str).unique().tolist()
-)
-
-patient_options = ["All Patients"] + patients
+patients = sorted(data["Case_ID"].astype(str).unique())
 
 selected_patient = st.sidebar.selectbox(
     "Select Patient",
-    patient_options
+    ["All"] + patients
 )
 
-activities = sorted(
-    df["Activity_Name"].astype(str).unique().tolist()
-)
-
-activity_options = ["All Activities"] + activities
+activities = sorted(data["Activity_Name"].unique())
 
 selected_activity = st.sidebar.selectbox(
     "Select Activity",
-    activity_options
+    ["All"] + activities
 )
 
-# --------------------------------------------------
-# FILTER DATA
-# --------------------------------------------------
+filtered = data.copy()
 
-filtered = df.copy()
-
-if selected_patient != "All Patients":
-
+if selected_patient != "All":
     filtered = filtered[
         filtered["Case_ID"].astype(str) == selected_patient
     ]
 
-if selected_activity != "All Activities":
-
+if selected_activity != "All":
     filtered = filtered[
         filtered["Activity_Name"] == selected_activity
     ]
 
-# --------------------------------------------------
-# PATIENT JOURNEY CALCULATION
-# --------------------------------------------------
 
-journeys = (
-    df.groupby("Case_ID")
+# KPI calculations
+total_patients = filtered["Case_ID"].nunique()
+total_events = len(filtered)
+
+patient_journey = (
+    filtered.groupby("Case_ID")
     .agg(
-        First_Event=("Timestamp", "min"),
-        Last_Event=("Timestamp", "max")
+        First_Activity=("Activity_Start_Time", "min"),
+        Last_Activity=("Activity_End_Time", "max")
     )
 )
 
-journeys["Journey_Minutes"] = (
-    journeys["Last_Event"] -
-    journeys["First_Event"]
+patient_journey["Journey_Minutes"] = (
+    patient_journey["Last_Activity"]
+    - patient_journey["First_Activity"]
 ).dt.total_seconds() / 60
 
-if selected_patient != "All Patients":
+patient_journey.loc[
+    patient_journey["Journey_Minutes"] < 0,
+    "Journey_Minutes"
+] = None
 
-    journeys = journeys.loc[
-        journeys.index.astype(str) == selected_patient
-    ]
+avg_journey = patient_journey["Journey_Minutes"].mean()
+avg_activity = filtered["Activity_Duration"].mean()
 
-average_journey = (
-    journeys["Journey_Minutes"].mean()
-    if not journeys.empty else 0
-)
+avg_journey = 0 if pd.isna(avg_journey) else avg_journey
+avg_activity = 0 if pd.isna(avg_activity) else avg_activity
 
-valid_durations = filtered[
-    filtered["Duration_Minutes"] >= 0
-]["Duration_Minutes"]
 
-average_duration = (
-    valid_durations.mean()
-    if not valid_durations.empty else 0
-)
+# KPI cards
+st.subheader("Overall Performance")
 
-# --------------------------------------------------
-# KPI CARDS
-# --------------------------------------------------
+c1, c2, c3, c4 = st.columns(4)
 
-st.subheader("Performance Overview")
+metrics = [
+    ("Total Patients", total_patients),
+    ("Total Events", total_events),
+    ("Average Journey", f"{avg_journey:.1f} min"),
+    ("Average Activity Duration", f"{avg_activity:.1f} min")
+]
 
-col1, col2, col3, col4 = st.columns(4)
+for col, (label, value) in zip([c1, c2, c3, c4], metrics):
+    with col:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">{label}</div>
+                <div class="metric-value">{value}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-col1.metric(
-    "Total Patients",
-    filtered["Case_ID"].nunique()
-)
+st.markdown("---")
 
-col2.metric(
-    "Total Events",
-    len(filtered)
-)
 
-col3.metric(
-    "Average Journey",
-    f"{average_journey:.1f} min"
-)
-
-col4.metric(
-    "Average Activity Duration",
-    f"{average_duration:.1f} min"
-)
-
-st.divider()
-
-# --------------------------------------------------
-# ACTIVITY DISTRIBUTION
-# --------------------------------------------------
-
+# Activity distribution
 st.subheader("Activity Analysis")
 
 left, right = st.columns(2)
 
 with left:
-
-    st.markdown("#### Activity Distribution")
+    st.markdown("### Activity Distribution")
 
     activity_counts = (
         filtered["Activity_Name"]
         .value_counts()
-        .rename_axis("Activity")
-        .reset_index(name="Event Count")
+        .reset_index()
     )
 
-    fig1 = px.bar(
-        activity_counts,
-        x="Activity",
-        y="Event Count",
-        text="Event Count",
-        color_discrete_sequence=["#315B7D"]
-    )
+    activity_counts.columns = ["Activity", "Count"]
 
-    fig1.update_traces(
-        textposition="outside"
-    )
+    if not activity_counts.empty:
+        fig = px.bar(
+            activity_counts,
+            x="Activity",
+            y="Count",
+            color="Count",
+            color_continuous_scale="Blues",
+            text="Count"
+        )
 
-    fig1.update_layout(
-        height=400,
-        plot_bgcolor="#FFFFFF",
-        paper_bgcolor="#FFFFFF",
-        font_color="#263445",
-        xaxis_title="Hospital Activity",
-        yaxis_title="Number of Events",
-        margin=dict(l=30, r=20, t=30, b=70)
-    )
+        fig.update_layout(
+            paper_bgcolor="#FFFFFF",
+            plot_bgcolor="#FFFFFF",
+            font_color="#243447",
+            showlegend=False,
+            coloraxis_showscale=False,
+            xaxis_title="Activity",
+            yaxis_title="Number of Events"
+        )
 
-    st.plotly_chart(
-        fig1,
-        use_container_width=True
-    )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No activity data available.")
+
 
 with right:
-
-    st.markdown("#### Average Activity Duration")
+    st.markdown("### Average Activity Duration")
 
     duration_data = (
-        filtered[
-            filtered["Duration_Minutes"] >= 0
-        ]
-        .groupby("Activity_Name")["Duration_Minutes"]
+        filtered.dropna(subset=["Activity_Duration"])
+        .groupby("Activity_Name")["Activity_Duration"]
         .mean()
         .reset_index()
     )
 
-    duration_data.columns = [
-        "Activity",
-        "Average Minutes"
-    ]
+    duration_data.columns = ["Activity", "Average Minutes"]
 
-    fig2 = px.bar(
-        duration_data,
-        x="Activity",
-        y="Average Minutes",
-        text_auto=".1f",
-        color_discrete_sequence=["#548C83"]
-    )
-
-    fig2.update_traces(
-        textposition="outside"
-    )
-
-    fig2.update_layout(
-        height=400,
-        plot_bgcolor="#FFFFFF",
-        paper_bgcolor="#FFFFFF",
-        font_color="#263445",
-        xaxis_title="Hospital Activity",
-        yaxis_title="Average Duration (Minutes)",
-        margin=dict(l=30, r=20, t=30, b=70)
-    )
-
-    st.plotly_chart(
-        fig2,
-        use_container_width=True
-    )
-
-st.divider()
-
-#
-
-# --------------------------------------------------
-# PATIENT JOURNEY TIMELINE
-# --------------------------------------------------
-
-st.subheader("Patient Journey Timeline")
-
-timeline_data = filtered.dropna(
-    subset=[
-        "Activity_Start_Time",
-        "Activity_End_Time"
-    ]
-).copy()
-
-timeline_data = timeline_data[
-    timeline_data["Activity_End_Time"] >=
-    timeline_data["Activity_Start_Time"]
-]
-
-if not timeline_data.empty:
-
-    fig4 = px.timeline(
-        timeline_data,
-        x_start="Activity_Start_Time",
-        x_end="Activity_End_Time",
-        y="Case_ID",
-        color="Activity_Name",
-        hover_data=[
-            "Activity_Name",
-            "Duration_Minutes"
-        ],
-        color_discrete_sequence=px.colors.qualitative.Safe
-    )
-
-    fig4.update_yaxes(
-        autorange="reversed"
-    )
-
-    fig4.update_layout(
-        height=max(
-            420,
-            55 * timeline_data["Case_ID"].nunique()
-        ),
-        paper_bgcolor="#FFFFFF",
-        plot_bgcolor="#FFFFFF",
-        font_color="#263445",
-        xaxis_title="Activity Time",
-        yaxis_title="Patient",
-        margin=dict(
-            l=30,
-            r=30,
-            t=40,
-            b=30
+    if not duration_data.empty:
+        fig = px.bar(
+            duration_data,
+            x="Activity",
+            y="Average Minutes",
+            color="Average Minutes",
+            color_continuous_scale="Teal",
+            text_auto=".1f"
         )
+
+        fig.update_layout(
+            paper_bgcolor="#FFFFFF",
+            plot_bgcolor="#FFFFFF",
+            font_color="#243447",
+            showlegend=False,
+            coloraxis_showscale=False,
+            xaxis_title="Activity",
+            yaxis_title="Average Duration (minutes)"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No valid activity duration data available.")
+
+
+# Workflow Bottleneck Alerts
+st.markdown("---")
+st.subheader("🚨 Workflow Bottleneck Alerts")
+
+st.caption(
+    "Highlights activities and patient journeys with durations "
+    "above the average in the selected dataset."
+)
+
+alert_left, alert_right = st.columns(2)
+
+valid_durations = filtered.dropna(
+    subset=["Activity_Duration"]
+)
+
+with alert_left:
+    st.markdown("### Activities Above Average Duration")
+
+    if not valid_durations.empty:
+        overall_avg_duration = valid_durations["Activity_Duration"].mean()
+
+        activity_alerts = (
+            valid_durations.groupby("Activity_Name")
+            ["Activity_Duration"]
+            .mean()
+            .reset_index()
+        )
+
+        activity_alerts.columns = [
+            "Activity",
+            "Average Duration (Minutes)"
+        ]
+
+        activity_alerts = activity_alerts[
+            activity_alerts["Average Duration (Minutes)"]
+            > overall_avg_duration
+        ].sort_values(
+            "Average Duration (Minutes)",
+            ascending=False
+        )
+
+        if not activity_alerts.empty:
+            st.warning(
+                f"{len(activity_alerts)} activities have an average "
+                f"duration above {overall_avg_duration:.1f} minutes."
+            )
+
+            st.dataframe(
+                activity_alerts.round(2),
+                use_container_width=True,
+                hide_index=True
+            )
+
+            longest_activity = activity_alerts.iloc[0]
+
+            st.metric(
+                "Longest Average Activity",
+                longest_activity["Activity"],
+                f"{longest_activity['Average Duration (Minutes)']:.1f} min"
+            )
+        else:
+            st.success(
+                "No activities are above the overall average duration."
+            )
+    else:
+        st.info("No valid activity duration data available.")
+
+
+with alert_right:
+    st.markdown("### Patient Journey Delay Indicators")
+
+    valid_journeys = patient_journey.dropna(
+        subset=["Journey_Minutes"]
     )
 
-    st.plotly_chart(
-        fig4,
-        use_container_width=True
-    )
+    if not valid_journeys.empty:
+        average_patient_journey = (
+            valid_journeys["Journey_Minutes"].mean()
+        )
 
-else:
+        delayed_patients = valid_journeys[
+            valid_journeys["Journey_Minutes"]
+            > average_patient_journey
+        ].sort_values(
+            "Journey_Minutes",
+            ascending=False
+        )
 
-    st.info(
-        "No valid activity start and end times are available."
-    )
+        if not delayed_patients.empty:
+            st.warning(
+                f"{len(delayed_patients)} patient journeys are "
+                f"longer than the average of "
+                f"{average_patient_journey:.1f} minutes."
+            )
 
-st.divider()
- 
-# --------------------------------------------------
-# PATIENT JOURNEY SUMMARY
-# --------------------------------------------------
+            st.dataframe(
+                delayed_patients[
+                    ["Journey_Minutes"]
+                ].round(2),
+                use_container_width=True
+            )
 
-st.subheader("Patient Journey Summary")
+            longest_patient = delayed_patients["Journey_Minutes"].idxmax()
 
-summary = (
-    df.groupby("Case_ID")
+            st.metric(
+                "Longest Patient Journey",
+                str(longest_patient),
+                f"{delayed_patients.loc[longest_patient, 'Journey_Minutes']:.1f} min"
+            )
+        else:
+            st.success("No above-average patient journeys found.")
+    else:
+        st.info("Patient journey durations are unavailable.")
+
+st.caption(
+    "These are duration-based indicators, not confirmed clinical or operational bottlenecks."
+)
+
+
+st.markdown("---")
+
+# Hospital Workflow Performance Radar
+st.subheader("🎯 Hospital Workflow Performance")
+
+st.caption(
+    "Compare hospital activities based on event frequency "
+    "and average duration."
+)
+
+radar_data = (
+    filtered.dropna(subset=["Activity_Duration"])
+    .groupby("Activity_Name")
     .agg(
-        Activity_Count=("Activity_Name", "count"),
-        First_Activity=("Timestamp", "min"),
-        Last_Activity=("Timestamp", "max")
+        Event_Count=("Activity_Name", "count"),
+        Average_Duration=("Activity_Duration", "mean")
     )
     .reset_index()
 )
 
-summary["Journey_Minutes"] = (
-    summary["Last_Activity"] -
-    summary["First_Activity"]
+if not radar_data.empty:
+    max_events = radar_data["Event_Count"].max()
+    max_duration = radar_data["Average_Duration"].max()
+
+    radar_data["Event Score"] = (
+        radar_data["Event_Count"] / max_events * 100
+        if max_events > 0 else 0
+    )
+
+    radar_data["Duration Score"] = (
+        radar_data["Average_Duration"] / max_duration * 100
+        if max_duration > 0 else 0
+    )
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatterpolar(
+        r=radar_data["Event Score"].tolist()
+        + [radar_data["Event Score"].iloc[0]],
+        theta=radar_data["Activity_Name"].tolist()
+        + [radar_data["Activity_Name"].iloc[0]],
+        fill="toself",
+        name="Event Frequency"
+    ))
+
+    fig.add_trace(go.Scatterpolar(
+        r=radar_data["Duration Score"].tolist()
+        + [radar_data["Duration Score"].iloc[0]],
+        theta=radar_data["Activity_Name"].tolist()
+        + [radar_data["Activity_Name"].iloc[0]],
+        fill="toself",
+        name="Average Duration"
+    ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100]
+            ),
+            bgcolor="#FFFFFF"
+        ),
+        paper_bgcolor="#FFFFFF",
+        font_color="#243447",
+        height=550,
+        legend=dict(
+            orientation="h",
+            y=-0.15
+        )
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    with st.expander("View workflow performance details"):
+        st.dataframe(
+            radar_data.round(2),
+            use_container_width=True,
+            hide_index=True
+        )
+else:
+    st.info("Not enough valid activity duration data for this chart.")
+
+# Patient Journey Timeline
+st.subheader("Patient Journey Timeline")
+
+timeline_data = filtered.dropna(
+    subset=["Activity_Start_Time", "Activity_End_Time"]
+).copy()
+
+timeline_data = timeline_data[
+    timeline_data["Activity_End_Time"]
+    >= timeline_data["Activity_Start_Time"]
+]
+
+if not timeline_data.empty:
+
+    timeline_data["Patient"] = (
+        timeline_data["Case_ID"].astype(str)
+    )
+
+    fig = px.timeline(
+        timeline_data,
+        x_start="Activity_Start_Time",
+        x_end="Activity_End_Time",
+        y="Patient",
+        color="Activity_Name",
+        hover_data=["Activity_Name"],
+        color_discrete_sequence=px.colors.qualitative.Set2
+    )
+
+    fig.update_yaxes(autorange="reversed")
+
+    fig.update_layout(
+        height=550,
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font_color="#243447",
+        xaxis_title="Timeline",
+        yaxis_title="Patient ID",
+        legend_title="Activity"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.info("No valid patient timeline data available.")
+
+
+st.markdown("---")
+
+
+# Patient summary table
+st.subheader("Patient Journey Summary")
+
+summary = (
+    filtered.groupby("Case_ID")
+    .agg(
+        Activity_Count=("Activity_Name", "count"),
+        First_Activity=("Activity_Start_Time", "min"),
+        Last_Activity=("Activity_End_Time", "max")
+    )
+    .reset_index()
+)
+
+summary["Total_Journey_Minutes"] = (
+    summary["Last_Activity"] - summary["First_Activity"]
 ).dt.total_seconds() / 60
 
-if selected_patient != "All Patients":
-
-    summary = summary[
-        summary["Case_ID"].astype(str) == selected_patient
-    ]
+summary["Total_Journey_Minutes"] = (
+    summary["Total_Journey_Minutes"].round(1)
+)
 
 st.dataframe(
     summary,
@@ -476,45 +545,17 @@ st.dataframe(
     hide_index=True
 )
 
-# --------------------------------------------------
-# DOWNLOAD REPORTS
-# --------------------------------------------------
 
-st.subheader("Download Reports")
+# Download
+st.download_button(
+    label="Download Filtered Patient Data",
+    data=filtered.to_csv(index=False).encode("utf-8"),
+    file_name="careflow_filtered_data.csv",
+    mime="text/csv"
+)
 
-download1, download2 = st.columns(2)
-
-with download1:
-
-    st.download_button(
-        "Download Patient Summary",
-        data=summary.to_csv(
-            index=False
-        ).encode("utf-8"),
-        file_name="careflow_patient_summary.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-
-with download2:
-
-    st.download_button(
-        "Download Filtered Events",
-        data=filtered.to_csv(
-            index=False
-        ).encode("utf-8"),
-        file_name="careflow_filtered_events.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-
-# --------------------------------------------------
-# FOOTER
-# --------------------------------------------------
-
-st.divider()
+st.markdown("---")
 
 st.caption(
-    "CareFlow | Healthcare Process Analytics | "
-    "Synthetic Educational Dataset"
+    "CareFlow Analytics | Academic Project | Synthetic Hospital Data"
 )
