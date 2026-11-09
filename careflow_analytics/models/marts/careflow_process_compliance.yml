@@ -1,0 +1,45 @@
+
+version: 2
+
+models:
+  - name: careflow_process_compliance
+    description: "Patient-level clinical pathway compliance verification"
+
+    columns:
+      - name: case_id
+        description: "Unique patient case identifier"
+        data_tests:
+          - unique
+          - not_null
+
+      - name: registration_first
+        data_tests:
+          - not_null
+
+      - name: has_triage
+        data_tests:
+          - not_null
+
+      - name: has_doctor_consultation
+        data_tests:
+          - not_null
+
+      - name: has_investigation
+        data_tests:
+          - not_null
+
+      - name: has_treatment
+        data_tests:
+          - not_null
+
+      - name: discharge_last
+        data_tests:
+          - not_null
+
+      - name: investigation_before_treatment
+        data_tests:
+          - not_null
+
+      - name: is_compliant
+        data_tests:
+          - not_null

@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: careflow_kpi_summary
+    description: "Overall CareFlow process and compliance KPI summary"
+
+    columns:
+      - name: total_cases
+        data_tests:
+          - not_null
+
+      - name: total_activities
+        data_tests:
+          - not_null
+
+      - name: compliant_cases
+        data_tests:
+          - not_null
+
+      - name: non_compliant_cases
+        data_tests:
+          - not_null
+
+      - name: compliance_rate_percentage
+        data_tests:
+          - not_null
+
+      - name: average_case_duration_minutes
+        data_tests:
+          - not_null
+
+      - name: average_activities_per_case
+        data_tests:
+          - not_null
