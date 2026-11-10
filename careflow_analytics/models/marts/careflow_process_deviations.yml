@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: careflow_process_deviations
+    description: >
+      Identifies patient cases that violate the defined
+      clinical pathway process rules.
+
+    columns:
+      - name: case_id
+        description: Unique patient case identifier.
+        data_tests:
+          - not_null
+
+      - name: deviation_type
+        description: Category of the identified process deviation.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - REGISTRATION_NOT_FIRST
+                  - MISSING_TRIAGE
+                  - MISSING_DOCTOR_CONSULTATION
+                  - MISSING_INVESTIGATION
+                  - MISSING_TREATMENT
+                  - DISCHARGE_NOT_LAST
+                  - INVESTIGATION_AFTER_TREATMENT
+
+      - name: deviation_description
+        description: Explanation of the identified deviation.
+        data_tests:
+          - not_null

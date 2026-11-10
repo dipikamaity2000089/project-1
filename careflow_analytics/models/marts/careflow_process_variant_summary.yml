@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: careflow_process_variant_summary
+    description: >
+      Summarizes unique patient process pathways,
+      case counts, and percentage distribution.
+
+    columns:
+      - name: process_variant
+        description: Unique sequence of patient activities.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: case_count
+        description: Number of cases following this process variant.
+        data_tests:
+          - not_null
+
+      - name: total_cases
+        description: Total number of patient cases.
+        data_tests:
+          - not_null
+
+      - name: percentage_of_cases
+        description: Percentage of cases following this variant.
+        data_tests:
+          - not_null
