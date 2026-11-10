@@ -18,12 +18,58 @@ st.markdown("""
     background-color: #F3F6F9;
     color: #243447;
 }
+
 [data-testid="stSidebar"] {
-    background-color: #E7EDF3;
+    background-color: #FFFFFF;
+    border-right: 1px solid #DCE4EC;
 }
+
+[data-testid="stSidebar"] > div:first-child {
+    padding: 2rem 1.2rem;
+}
+
+[data-testid="stSidebar"] h1 {
+    color: #20364B;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+[data-testid="stSidebar"] label {
+    color: #42566B;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background-color: #F7F9FC;
+    border: 1px solid #DCE4EC;
+    border-radius: 8px;
+    min-height: 42px;
+}
+
+[data-testid="stSidebar"] [data-baseweb="select"] > div:hover {
+    border-color: #159A9C;
+}
+
+[data-testid="stSidebar"] .stButton button {
+    background-color: #20364B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    min-height: 40px;
+    font-weight: 600;
+    width: 100%;
+}
+
+[data-testid="stSidebar"] .stButton button:hover {
+    background-color: #159A9C;
+    color: white;
+}
+
 h1, h2, h3 {
     color: #20364B;
 }
+
 .metric-card {
     background-color: #FFFFFF;
     padding: 20px;
@@ -32,10 +78,12 @@ h1, h2, h3 {
     box-shadow: 0 2px 7px rgba(20, 40, 60, 0.06);
     text-align: center;
 }
+
 .metric-label {
     color: #62758A;
     font-size: 14px;
 }
+
 .metric-value {
     color: #20364B;
     font-size: 27px;
@@ -105,21 +153,40 @@ st.markdown("---")
 
 
 # Sidebar filters
+def reset_filters():
+    st.session_state["patient_filter"] = "All"
+    st.session_state["activity_filter"] = "All"
+
+
 st.sidebar.title("Dashboard Filters")
+st.sidebar.caption("Customize your patient data view")
+
+st.sidebar.markdown("---")
 
 patients = sorted(data["Case_ID"].astype(str).unique())
+activities = sorted(data["Activity_Name"].unique())
 
 selected_patient = st.sidebar.selectbox(
     "Select Patient",
-    ["All"] + patients
+    ["All"] + patients,
+    key="patient_filter"
 )
-
-activities = sorted(data["Activity_Name"].unique())
 
 selected_activity = st.sidebar.selectbox(
     "Select Activity",
-    ["All"] + activities
+    ["All"] + activities,
+    key="activity_filter"
 )
+
+st.sidebar.markdown("---")
+
+st.sidebar.button(
+    "Reset Filters",
+    on_click=reset_filters,
+    use_container_width=True
+)
+
+st.sidebar.caption("CareFlow Analytics | Data Filters")
 
 filtered = data.copy()
 
@@ -190,7 +257,7 @@ for col, (label, value) in zip([c1, c2, c3, c4], metrics):
 st.markdown("---")
 
 
-# Activity distribution
+# Activity analysis
 st.subheader("Activity Analysis")
 
 left, right = st.columns(2)
@@ -268,7 +335,7 @@ with right:
         st.info("No valid activity duration data available.")
 
 
-# Workflow Bottleneck Alerts
+# Workflow bottleneck alerts
 st.markdown("---")
 st.subheader("🚨 Workflow Bottleneck Alerts")
 
@@ -383,18 +450,18 @@ with alert_right:
         st.info("Patient journey durations are unavailable.")
 
 st.caption(
-    "These are duration-based indicators, not confirmed clinical or operational bottlenecks."
+    "These are duration-based indicators, not confirmed clinical "
+    "or operational bottlenecks."
 )
 
 
+# Hospital workflow performance radar
 st.markdown("---")
-
-# Hospital Workflow Performance Radar
 st.subheader("🎯 Hospital Workflow Performance")
 
 st.caption(
     "Compare hospital activities based on event frequency "
-    "and average duration."
+    "and average duration. Scores are normalized to a 0–100 scale."
 )
 
 radar_data = (
@@ -469,7 +536,9 @@ if not radar_data.empty:
 else:
     st.info("Not enough valid activity duration data for this chart.")
 
-# Patient Journey Timeline
+
+# Patient journey timeline
+st.markdown("---")
 st.subheader("Patient Journey Timeline")
 
 timeline_data = filtered.dropna(
@@ -482,7 +551,6 @@ timeline_data = timeline_data[
 ]
 
 if not timeline_data.empty:
-
     timeline_data["Patient"] = (
         timeline_data["Case_ID"].astype(str)
     )
@@ -510,7 +578,6 @@ if not timeline_data.empty:
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
 else:
     st.info("No valid patient timeline data available.")
 
@@ -518,7 +585,7 @@ else:
 st.markdown("---")
 
 
-# Patient summary table
+# Patient journey summary
 st.subheader("Patient Journey Summary")
 
 summary = (
@@ -546,7 +613,18 @@ st.dataframe(
 )
 
 
-# Download
+# Download patient journey summary
+st.download_button(
+    label="Download Patient Journey Summary",
+    data=summary.to_csv(index=False).encode("utf-8"),
+    file_name="careflow_patient_journey_summary.csv",
+    mime="text/csv"
+)
+
+
+# Download filtered patient data
+st.markdown("---")
+
 st.download_button(
     label="Download Filtered Patient Data",
     data=filtered.to_csv(index=False).encode("utf-8"),
