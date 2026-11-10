@@ -1,0 +1,16 @@
+dimension,segment,cases,loop_pct,avg_stay_min
+Doctor_ID,D01,92,43.5,201.1
+Doctor_ID,D02,69,26.1,194.0
+Doctor_ID,D03,92,37.0,200.1
+Doctor_ID,D04,91,60.4,204.6
+Doctor_ID,D05,70,32.9,194.6
+Doctor_ID,D06,86,32.6,195.9
+Age_Group,0-17,85,34.1,196.1
+Age_Group,18-39,165,37.0,198.0
+Age_Group,40-59,150,36.7,196.3
+Age_Group,60+,100,53.0,206.0
+Triage_Level,1,24,45.8,201.6
+Triage_Level,2,81,42.0,193.3
+Triage_Level,3,188,34.6,200.3
+Triage_Level,4,139,43.9,199.7
+Triage_Level,5,68,39.7,198.2

@@ -1,0 +1,7 @@
+kpi,value
+cases,500.0
+avg_length_of_stay_min,198.8
+pct_cases_looping_back_to_triage,39.6
+avg_los_with_loop_min,215.2
+avg_los_without_loop_min,188.0
+pct_conformant,60.4
